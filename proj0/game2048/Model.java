@@ -113,6 +113,53 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        this.board.setViewingPerspective(side);         // begin with this line
+
+        for (int col = 0; col < board.size(); ++col) {  // deal with a certain column, others are the same
+
+            boolean couldMerge = true;
+            for (int row = board.size() - 2; row >= 0; --row) {
+                Tile curr = board.tile(col, row);
+
+                if (curr == null) {     // skip blank space
+                                        // pay attention to NullPointerException!!
+                    continue;
+                }
+
+                // search forward until a non-blank space ,
+                // if `curr` could be merged with it, target is exactly it,
+                // Otherwise, target is the blank space before it.
+                int target = -1;
+                for (int k = row + 1; k < board.size(); ++k) {
+                    Tile prev = board.tile(col, k);
+                    if (prev != null) {
+                        if (couldMerge && prev.value() == curr.value()) {
+                            target = k;
+                        }
+                        break;
+                    } else {
+                        target = k;
+                    }
+                }
+
+                // deal with `changed`
+                if (target != -1) {
+                    changed = true;
+                }
+
+                // deal with `couldMerge`
+                if (target != -1 && board.move(col, target, curr)) {
+                    // if `curr` has been merged, next one could not merge
+                    score += board.tile(col, target).value();
+                    couldMerge = false;
+                } else {
+                    // otherwise, next one might be merged with me.
+                    couldMerge = true;
+                }
+            }
+        }
+
+        this.board.setViewingPerspective(Side.NORTH);   // end with this line
 
         checkGameOver();
         if (changed) {
@@ -138,6 +185,13 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); ++i) {
+            for (int j = 0; j < b.size(); ++j) {
+                if (b.tile(i, j) == null) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +202,16 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); ++i) {
+            for (int j = 0; j < b.size(); ++j) {
+                Tile t = b.tile(i, j);
+                // Note that before fetch the field `t.value()`,
+                // we should guarantee that `t` is not null.
+                if (t != null && t.value() == MAX_PIECE) {  // with help of short-circuit
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +223,33 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) {
+            return true;
+        }
+
+        // check up-down merge
+        for (int i = 0; i < b.size(); ++i) {
+            for (int j = 1; j < b.size(); ++j) {
+                Tile curr = b.tile(i, j);
+                Tile prev = b.tile(i, j - 1);
+                // since we have checked `emptySpaceExists(b)` at the very beginning,
+                // so both `curr` and `prev` are non-null variables.
+                if (curr.value() == prev.value()) {
+                    return true;
+                }
+            }
+        }
+
+        // check left-right merge
+        for (int j = 0; j < b.size(); ++j) {
+            for (int i = 1; i < b.size(); ++i) {
+                Tile curr = b.tile(i, j);
+                Tile prev = b.tile(i - 1, j);
+                if (curr.value() == prev.value()) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
