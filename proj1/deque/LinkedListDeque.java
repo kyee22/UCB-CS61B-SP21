@@ -6,8 +6,8 @@ public class LinkedListDeque<T> {
 
     private static class Node<T> {
         private T item;
-        private Node next;
-        private Node prev;
+        private Node<T> next;
+        private Node<T> prev;
 
         public Node(T i) {
             this.item = i;
@@ -15,11 +15,11 @@ public class LinkedListDeque<T> {
             this.prev = this;
         }
 
-        public void setNext(Node elem) {
+        public void setNext(Node<T> elem) {
             this.next = elem;
         }
 
-        public void setPrev(Node elem) {
+        public void setPrev(Node<T> elem) {
             this.prev = elem;
         }
 
@@ -46,7 +46,7 @@ public class LinkedListDeque<T> {
 
     public LinkedListDeque() {
         this.size = 0;
-        this.sentinel = new Node<>(22584); // sentinel with a magic number
+        this.sentinel = new Node<>(28332); // sentinel with a magic number
     }
 
     public void addFirst(T item) {
@@ -153,33 +153,51 @@ public class LinkedListDeque<T> {
         return p.getItem();
     }
 
+    private T helpRecursiveGet(Node<T> elem, int index) {
+        if (index == 0) {
+            return elem.getItem();
+        }
+
+        return helpRecursiveGet(elem.getNext(), index - 1);
+    }
+
+    public T getRecursive(int index) {
+        if (index < 0 || index >= size) {
+            return null;
+        }
+
+        return (T) helpRecursiveGet(sentinel.getNext(), index);
+    }
+
     public Iterator<T> iterator() {
         // TODO
         return null;
     }
 
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof LinkedListDeque)) {
-            return false;
-        }
+        // TODO after implementation of iterator
 
-        LinkedListDeque<T> other = (LinkedListDeque<T>) o;
-
-        if (this.isEmpty() != other.isEmpty()) {
-            return false;
-        }
-
-        if (this.isEmpty()) {
-            return true;
-        }
-
-        Node<T> p = sentinel.getNext();
-        Node<T> q = other.getSentinel().getNext();
-        for (; p != this.sentinel; p = p.getNext(), q = q.getNext()) {
-            if (!p.equals(q)) {
-                return false;
-            }
-        }
+        //if (o == null || !(o instanceof LinkedListDeque)) {
+        //    return false;
+        //}
+        //
+        //LinkedListDeque<T> other = (LinkedListDeque<T>) o;
+        //
+        //if (this.isEmpty() != other.isEmpty()) {
+        //    return false;
+        //}
+        //
+        //if (this.isEmpty()) {
+        //    return true;
+        //}
+        //
+        //Node<T> p = sentinel.getNext();
+        //Node<T> q = other.getSentinel().getNext();
+        //for (; p != this.sentinel; p = p.getNext(), q = q.getNext()) {
+        //    if (!p.equals(q)) {
+        //        return false;
+        //    }
+        //}
 
         return true;
     }
