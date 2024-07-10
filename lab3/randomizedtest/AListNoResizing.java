@@ -1,5 +1,9 @@
 package randomizedtest;
 
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
 /** Array based list.
  *  @author Josh Hug
  */
@@ -51,5 +55,19 @@ public class AListNoResizing<Item> {
         items[size - 1] = null;
         size = size - 1;
         return x;
+    }
+
+    @Test
+    public void testThreeAddThreeRemove() {
+        AListNoResizing<Integer> sample = new AListNoResizing<>();
+
+        sample.addLast(4);
+        sample.addLast(5);
+        sample.addLast(6);
+
+        assertEquals((Integer) 6, sample.removeLast());
+        assertEquals((Integer) 5, sample.removeLast());
+        assertEquals((Integer) 4, sample.removeLast());
+
     }
 }
