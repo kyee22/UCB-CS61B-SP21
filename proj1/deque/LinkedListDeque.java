@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class LinkedListDeque<T> implements Deque<T> {
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     private static class Node<T> {
         private T item;
@@ -172,6 +172,7 @@ public class LinkedListDeque<T> implements Deque<T> {
         return (T) helpRecursiveGet(sentinel.getNext(), index);
     }
 
+    @Override
     public Iterator<T> iterator() {
         return new LinkedListDequeIterator();
     }
