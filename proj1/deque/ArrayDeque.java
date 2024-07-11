@@ -49,7 +49,7 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public void printDeque() {
         Iterator<T> iter = this.iterator();
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             System.out.print(iter.next());
             System.out.print(" ");
         }
@@ -103,7 +103,6 @@ public class ArrayDeque<T> implements Deque<T> {
         return items[target];
     }
 
-    @Override
     public Iterator<T> iterator() {
         return new ArrayDequeIterator();
     }
@@ -133,19 +132,18 @@ public class ArrayDeque<T> implements Deque<T> {
         if (o == null || !(o instanceof Deque)) {
             return false;
         }
+        Deque<T> other = (Deque<T>) o;
 
-        if (this.size() != ((Deque<T>) o).size()) {
+        if (this.size() != other.size()) {
             return false;
         }
 
-        Iterator<T> me = this.iterator();
-        Iterator<T> other = ((Deque<T>) o).iterator();
-
-        while (me.hasNext() && other.hasNext()) {
-            if (me.next().equals(other.next())) {
+        for (int i = 0; i < this.size(); ++i) {
+            if (this.get(i).equals(other.get(i))) {
                 return false;
             }
         }
+
         return true;
     }
 

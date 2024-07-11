@@ -12,21 +12,26 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
     }
 
     public T max() {
-        if (super.isEmpty()) {
-            return null;
-        }
+        //if (super.isEmpty()) {
+        //    return null;
+        //}
+        //
+        //T result = super.get(0);
+        //
+        //Iterator<T> iter = super.iterator();
+        //while (iter.hasNext()) {
+        //    T curr = iter.next();
+        //    if (comparator.compare(curr, result) > 0) {
+        //        result = curr;
+        //    }
+        //}
+        //
+        //return result;
 
-        T result = super.get(0);
-
-        Iterator<T> iter = super.iterator();
-        while (iter.hasNext()) {
-            T curr = iter.next();
-            if (comparator.compare(curr, result) > 0) {
-                result = curr;
-            }
-        }
-
-        return result;
+        /** More elegant call!!
+         *  inspired from https://github.com/exuanbo/cs61b-sp21/blob/main/proj1/deque/MaxArrayDeque.java
+         */
+        return this.max(this.comparator);
     }
 
     public T max(Comparator<T> c) {
