@@ -3,7 +3,6 @@ package gh2;
 // DONE: uncomment the following import once you're ready to start this portion
  import deque.Deque;
  import deque.LinkedListDeque;
- import net.sf.saxon.expr.Component;
 // DONE: maybe more imports
 
 
