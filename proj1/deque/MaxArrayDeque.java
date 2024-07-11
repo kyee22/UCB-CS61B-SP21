@@ -29,7 +29,8 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         //return result;
 
         /** More elegant call!!
-         *  inspired from https://github.com/exuanbo/cs61b-sp21/blob/main/proj1/deque/MaxArrayDeque.java
+         *  inspired from:
+         *  https://github.com/exuanbo/cs61b-sp21/blob/main/proj1/deque/MaxArrayDeque.java
          */
         return this.max(this.comparator);
     }

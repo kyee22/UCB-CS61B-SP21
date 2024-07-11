@@ -1,8 +1,7 @@
 package gh2;
 
 // DONE: uncomment the following import once you're ready to start this portion
- import deque.Deque;
- import deque.LinkedListDeque;
+import deque.*;
 // DONE: maybe more imports
 
 
