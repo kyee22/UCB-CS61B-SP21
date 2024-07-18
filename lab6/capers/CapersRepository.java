@@ -1,10 +1,14 @@
 package capers;
 
+//import org.checkerframework.checker.units.qual.C;
+
 import java.io.File;
+import java.io.IOException;
+
 import static capers.Utils.*;
 
 /** A repository for Capers 
- * @author TODO
+ * @author Arren
  * The structure of a Capers Repository is as follows:
  *
  * .capers/ -- top level folder for all persistent data in your lab12 folder
@@ -18,8 +22,10 @@ public class CapersRepository {
     static final File CWD = new File(System.getProperty("user.dir"));
 
     /** Main metadata folder. */
-    static final File CAPERS_FOLDER = null; // TODO Hint: look at the `join`
+    static final File CAPERS_FOLDER = Utils.join(CWD, ".capers");
+                                            // TODO Hint: look at the `join`
                                             //      function in Utils
+    static final File STORY_FILE = Utils.join(CAPERS_FOLDER, "story");
 
     /**
      * Does required filesystem operations to allow for persistence.
@@ -32,6 +38,15 @@ public class CapersRepository {
      */
     public static void setupPersistence() {
         // TODO
+        CAPERS_FOLDER.mkdir();
+        Dog.DOG_FOLDER.mkdir();
+        if (!STORY_FILE.exists()) {
+            try {
+                STORY_FILE.createNewFile();
+            } catch (Exception e) {
+                System.err.println("fail to create " + String.valueOf(STORY_FILE));
+            }
+        }
     }
 
     /**
@@ -41,6 +56,10 @@ public class CapersRepository {
      */
     public static void writeStory(String text) {
         // TODO
+        String story = Utils.readContentsAsString(STORY_FILE);
+        story += text + "\n";
+        Utils.writeContents(STORY_FILE, story);
+        System.out.print(story);
     }
 
     /**
@@ -50,6 +69,9 @@ public class CapersRepository {
      */
     public static void makeDog(String name, String breed, int age) {
         // TODO
+        Dog dog = new Dog(name, breed, age);
+        dog.saveDog();
+        System.out.println(dog);
     }
 
     /**
@@ -60,5 +82,9 @@ public class CapersRepository {
      */
     public static void celebrateBirthday(String name) {
         // TODO
+        Dog dog = Dog.fromFile(name);
+        dog.haveBirthday();
+        dog.saveDog();
+        //System.out.println(dog);
     }
 }
