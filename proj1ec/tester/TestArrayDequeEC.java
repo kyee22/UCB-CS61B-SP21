@@ -1,13 +1,10 @@
 package tester;
 
 import static org.junit.Assert.*;
-
-import edu.princeton.cs.algs4.ST;
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 import student.StudentArrayDeque;
 
-import java.util.ArrayList;
 
 public class TestArrayDequeEC {
 
@@ -20,6 +17,7 @@ public class TestArrayDequeEC {
 
         for (int i = 0; i < N; i += 1) {
 
+            // ALWAYS check the size, that is at any time!!
             debugInfo += "size()\n";
             assertEquals(debugInfo, std.size(), stu.size());
 
