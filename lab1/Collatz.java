@@ -24,7 +24,7 @@ public class Collatz {
     //}
 
     public static void main(String[] args) {
-        int n = 999;
+        int n = 5;
         System.out.print(n + " ");
         while (n != 1) {
             n = nextNumber(n);
