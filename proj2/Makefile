@@ -41,4 +41,5 @@ clean:
 	$(RM) *~
 	$(RMAKE) -C $(PACKAGE) clean
 	$(RMAKE) -C testing clean
+	rm -rf .gitlet
 
