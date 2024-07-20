@@ -17,7 +17,7 @@ public class Main {
         panic(args.length <= 0, "Please enter a command.");
         String firstArg = args[0];
 
-        switch(firstArg) {
+        switch (firstArg) {
             case "init":
                 validateNumArgs(args, 1);
                 try {

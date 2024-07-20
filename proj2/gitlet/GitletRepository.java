@@ -24,7 +24,8 @@ public class GitletRepository {
     static final File BRANCHES_DIR = Utils.join(REFS_DIR, "branches");
     private static Stage stageForAddition;
     private static Stage stageForRemoval;
-    private static final String DEFAULT_BRANCH = "master";  // modify your preferred default branch here!!
+    // modify your preferred default branch here!!
+    private static final String DEFAULT_BRANCH = "master";
 
     /*
      *   .gitlet
@@ -103,7 +104,8 @@ public class GitletRepository {
         Commit curCommit = popHead();
 
         // 文件未变更，从暂存区中移除
-        if (curCommit.contains(blob.getPath()) && curCommit.get(blob.getPath()).equals(blob.getUID())) {
+        if (curCommit.contains(blob.getPath())
+                && curCommit.get(blob.getPath()).equals(blob.getUID())) {
             stageForAddition.remove(blob);
         } else { // // 否则，覆盖写到暂存区
             blob.save();

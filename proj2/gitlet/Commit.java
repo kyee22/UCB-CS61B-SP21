@@ -10,7 +10,6 @@ import java.util.Date; // TODO: You'll likely use this in this class
 import java.util.TreeMap;
 import java.util.Locale;
 
-
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
@@ -26,7 +25,8 @@ public class Commit implements Serializable {
      * variable is used. We've provided one example for `message`.
      */
 
-    private static DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
+    private static DateFormat dateFormat =
+            new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
 
     /** The message of this Commit. */
     private String message;
@@ -83,20 +83,18 @@ public class Commit implements Serializable {
     }
 
     public static Commit fromFileByUID(String UID) {
-        return (Commit) Utils.readObject(Utils.join(GitletRepository.COMMIT_DIR, UID), Commit.class);
+        return Utils.readObject(Utils.join(GitletRepository.COMMIT_DIR, UID), Commit.class);
     }
 
     public static Commit fromFileByPrefixUID(String prefix) {
         for (String uid : Utils.plainFilenamesIn(GitletRepository.COMMIT_DIR)) {
             if (uid.startsWith(prefix)) {
-                return (Commit) Utils.readObject(Utils.join(GitletRepository.COMMIT_DIR, uid), Commit.class);
+                return Utils.readObject(Utils.join(GitletRepository.COMMIT_DIR, uid), Commit.class);
             }
         }
 
         return null;
     }
-
-
 
     @Override
     public boolean equals(Object o) {
