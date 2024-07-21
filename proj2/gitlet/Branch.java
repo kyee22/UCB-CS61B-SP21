@@ -81,6 +81,11 @@ public class Branch {
         Utils.writeContents(file, uid);
     }
 
+    public static void delete(String branchName) {
+        File file = Utils.join(BRANCHES_DIR, branchName);
+        file.delete();
+    }
+
     public static void checkout(String branchName) {
         Utils.writeContents(HEAD_FILE, branchName);
     }

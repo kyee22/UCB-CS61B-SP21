@@ -286,6 +286,45 @@ public class GitletRepository {
         Branch.create(branchName);
     }
 
+    public static void rm_branch(String branchName) throws GitletException {
+        if (!Branch.exist(branchName)) {
+            throw new GitletException("A branch with that name does not exist.");
+        }
+        if (Branch.curBranch().equals(branchName)) {
+            throw new GitletException("Cannot remove the current branch.");
+        }
+        Branch.delete(branchName);
+    }
+
+    public static void reset(String commitId) throws GitletException {
+        popStage();
+        Commit commit = Commit.fromFileByPrefixUID(commitId);
+        if (commit == null) {
+            throw new GitletException("No commit with that id exists.");
+        }
+        if (!untrackedFiles().isEmpty()) {
+            throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+
+        for (String uid : commit.dCloneBlobMap().values()) {
+            Blob blob = Blob.fromFile(uid);
+            blob.writeBack();
+        }
+
+        for (String name : Utils.plainFilenamesIn(CWD)) {
+            File file = Utils.join(CWD, name);
+            if (!commit.contains(file.getPath())) {
+                Utils.restrictedDelete(file);
+            }
+        }
+
+        stageForAddition.clear();
+        stageForRemoval.clear();
+        Branch.updateHead(commit.getUID());
+
+        pushStage();
+    }
+
     /**        CWD Monitor Methods     **/
     private static ArrayList<String> untrackedFiles() {
         Commit curCommit = Branch.popHead();

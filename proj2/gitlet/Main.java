@@ -107,6 +107,26 @@ public class Main {
                 }
                 break;
 
+            case "rm-branch":
+                validateNumArgs(args, 2);
+                validateGitletExist();
+                try {
+                    GitletRepository.rm_branch(args[1]);
+                } catch (GitletException e) {
+                    panic(true, e.getMessage());
+                }
+                break;
+
+            case "reset":
+                validateNumArgs(args, 2);
+                validateGitletExist();
+                try {
+                    GitletRepository.reset(args[1]);
+                } catch (GitletException e) {
+                    panic(true, e.getMessage());
+                }
+                break;
+
             default:
                 panic(true, "No command with that name exists.");
         }
