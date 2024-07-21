@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 public class Blob implements Serializable {
     static final File BLOB_DIR = Utils.join(GitletRepository.OBJ_DIR, "blobs");
@@ -54,5 +55,9 @@ public class Blob implements Serializable {
 
     public File getFile() {
         return file;
+    }
+
+    public String getContentAsString() {
+        return new String(content, StandardCharsets.UTF_8);
     }
 }

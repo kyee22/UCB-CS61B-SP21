@@ -30,111 +30,24 @@ public class Main {
                 break;
 
             case "add":
-                validateNumArgs(args, 2);
-                validateGitletExist();
-                try {
-                    GitletRepository.add(args[1]);
-                } catch (GitletException e) {
-                    panic(true, e.getMessage());
-                }
-                break;
-
             case "commit":
-                validateNumArgs(args, 2);
-                validateGitletExist();
-                try {
-                    GitletRepository.commit(args[1]);
-                } catch (GitletException e) {
-                    panic(true, e.getMessage());
-                }
-                break;
-
             case "checkout":
-                validateNumArgs(args, 2, 3, 4);
-                validateGitletExist();
-                try {
-                    GitletRepository.checkout(Arrays.copyOfRange(args, 1, args.length));
-                } catch (GitletException e) {
-                    panic(true, e.getMessage());
-                }
-                break;
-
             case "rm":
-                validateNumArgs(args, 2);
-                validateGitletExist();
-                try {
-                    GitletRepository.rm(args[1]);
-                } catch (GitletException e) {
-                    panic(true, e.getMessage());
-                }
-                break;
-
             case "log":
-                validateNumArgs(args, 1);
-                validateGitletExist();
-                GitletRepository.log();
-                break;
-
             case "global-log":
-                validateNumArgs(args, 1);
-                validateGitletExist();
-                GitletRepository.global_log();
-                break;
-
             case "find":
-                validateNumArgs(args, 2);
-                validateGitletExist();
-                try {
-                    GitletRepository.find(args[1]);
-                } catch (GitletException e) {
-                    panic(true, e.getMessage());
-                }
-                break;
-
             case "status":
-                validateNumArgs(args, 1);
-                validateGitletExist();
-                GitletRepository.status();
-                break;
-
             case "branch":
-                validateNumArgs(args, 2);
-                validateGitletExist();
-                try {
-                    GitletRepository.branch(args[1]);
-                } catch (GitletException e) {
-                    panic(true, e.getMessage());
-                }
-                break;
-
             case "rm-branch":
-                validateNumArgs(args, 2);
-                validateGitletExist();
-                try {
-                    GitletRepository.rm_branch(args[1]);
-                } catch (GitletException e) {
-                    panic(true, e.getMessage());
-                }
-                break;
-
             case "reset":
-                validateNumArgs(args, 2);
+            case "merge":
                 validateGitletExist();
                 try {
-                    GitletRepository.reset(args[1]);
+                    GitletRepository.entry(args);
                 } catch (GitletException e) {
                     panic(true, e.getMessage());
                 }
                 break;
-
-            case "merge":
-                validateNumArgs(args, 2);
-                validateGitletExist();
-                try {
-                    GitletRepository.merge(args[1]);
-                } catch (GitletException e) {
-                    panic(true, e.getMessage());
-                }
 
             default:
                 panic(true, "No command with that name exists.");
