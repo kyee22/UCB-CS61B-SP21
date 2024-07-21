@@ -502,7 +502,8 @@ public class GitletRepository {
             Blob blob = Blob.fromFile(uid);
             sb.append(blob.getContentAsString());
         }
-        sb.append(">>>>>>>");
+        sb.append(">>>>>>>\n");
+
 
         Utils.writeContents(new File(path), sb.toString());
         add(path);
