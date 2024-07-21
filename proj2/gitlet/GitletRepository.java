@@ -505,6 +505,7 @@ public class GitletRepository {
         sb.append(">>>>>>>");
 
         Utils.writeContents(new File(path), sb.toString());
+        add(path);
     }
 
     /**        CWD Monitor Methods     **/
