@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 
 public class Blob implements Serializable {
+    static final File BLOB_DIR = Utils.join(GitletRepository.OBJ_DIR, "blobs");
 
     private File file;
     private byte[] content;
@@ -15,6 +16,10 @@ public class Blob implements Serializable {
         this.UID = Utils.sha1(file.getPath(), content);
     }
 
+    public static void init() {
+        BLOB_DIR.mkdir();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -24,7 +29,7 @@ public class Blob implements Serializable {
             return false;
         }
 
-        return UID.equals(((Blob)o).getUID());
+        return UID.equals(((Blob) o).getUID());
     }
 
     public String getUID() {
@@ -36,11 +41,11 @@ public class Blob implements Serializable {
     }
 
     public void save() {
-        Utils.writeObject(Utils.join(GitletRepository.BLOB_DIR, UID), this);
+        Utils.writeObject(Utils.join(BLOB_DIR, UID), this);
     }
 
     public static Blob fromFile(String UID) {
-        return (Blob) Utils.readObject(Utils.join(GitletRepository.BLOB_DIR, UID), Blob.class);
+        return (Blob) Utils.readObject(Utils.join(BLOB_DIR, UID), Blob.class);
     }
 
     public void writeBack() {

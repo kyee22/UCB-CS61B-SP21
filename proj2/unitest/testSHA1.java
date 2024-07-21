@@ -3,6 +3,7 @@ package unitest;
 import gitlet.Blob;
 import gitlet.Commit;
 import gitlet.Utils;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.io.File;
@@ -116,5 +117,6 @@ public class testSHA1 {
         TreeMap<String, String> mp = new TreeMap<>();
         mp.remove("2");
         System.out.println(Utils.plainFilenamesIn(TEST));
+        System.out.println(Utils.plainFilenamesIn(CWD));
     }
 }

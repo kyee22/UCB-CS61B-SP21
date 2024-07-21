@@ -105,4 +105,21 @@ public class testBlob {
         stage.remove(blob1);
         assertTrue(stage.isEmpty());
     }
+
+    @Test
+    public void testMergeCommitLog() {
+        Commit initCommit = new Commit();
+        ArrayList<String> p = new ArrayList<>();
+        p.add(initCommit.getUID());
+
+        Commit commit1 = new Commit("commit 1", new TreeMap<>(), p);
+
+        ArrayList<String> pp = new ArrayList<>();
+        pp.add(initCommit.getUID());
+        pp.add(commit1.getUID());
+        Commit commit2 = new Commit("merge", new TreeMap<>(), pp);
+
+        System.out.println(commit1);
+        System.out.println(commit2);
+    }
 }

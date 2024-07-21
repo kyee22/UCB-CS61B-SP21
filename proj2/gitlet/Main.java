@@ -1,5 +1,7 @@
 package gitlet;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
@@ -26,6 +28,7 @@ public class Main {
                     panic(true, e.getMessage());
                 }
                 break;
+
             case "add":
                 validateNumArgs(args, 2);
                 validateGitletExist();
@@ -35,6 +38,7 @@ public class Main {
                     panic(true, e.getMessage());
                 }
                 break;
+
             case "commit":
                 validateNumArgs(args, 2);
                 validateGitletExist();
@@ -46,10 +50,20 @@ public class Main {
                 break;
 
             case "checkout":
-                validateNumArgs(args, 3, 4);
+                validateNumArgs(args, 2, 3, 4);
                 validateGitletExist();
                 try {
                     GitletRepository.checkout(Arrays.copyOfRange(args, 1, args.length));
+                } catch (GitletException e) {
+                    panic(true, e.getMessage());
+                }
+                break;
+
+            case "rm":
+                validateNumArgs(args, 2);
+                validateGitletExist();
+                try {
+                    GitletRepository.rm(args[1]);
                 } catch (GitletException e) {
                     panic(true, e.getMessage());
                 }
@@ -61,10 +75,36 @@ public class Main {
                 GitletRepository.log();
                 break;
 
+            case "global-log":
+                validateNumArgs(args, 1);
+                validateGitletExist();
+                GitletRepository.global_log();
+                break;
+
+            case "find":
+                validateNumArgs(args, 2);
+                validateGitletExist();
+                try {
+                    GitletRepository.find(args[1]);
+                } catch (GitletException e) {
+                    panic(true, e.getMessage());
+                }
+                break;
+
             case "status":
                 validateNumArgs(args, 1);
                 validateGitletExist();
                 GitletRepository.status();
+                break;
+
+            case "branch":
+                validateNumArgs(args, 2);
+                validateGitletExist();
+                try {
+                    GitletRepository.branch(args[1]);
+                } catch (GitletException e) {
+                    panic(true, e.getMessage());
+                }
                 break;
 
             default:

@@ -3,6 +3,7 @@ package gitlet;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.TreeMap;
 
 public class GitletRepository {
@@ -10,22 +11,9 @@ public class GitletRepository {
 
     /** Main metadata folder. */
     static final File GITLET_DIR = Utils.join(CWD, ".gitlet");
-    // TODO Hint: look at the `join`
-    //      function in Utils
-    static final File STORY_FILE = Utils.join(GITLET_DIR, "story");
     static final File OBJ_DIR = Utils.join(GITLET_DIR, "objects");
-    static final File BLOB_DIR = Utils.join(OBJ_DIR, "blobs");
-    static final File COMMIT_DIR = Utils.join(OBJ_DIR, "commits");
-    static final File HEAD_FILE = Utils.join(GITLET_DIR, "HEAD");
-    static final File INDEX_DIR = Utils.join(GITLET_DIR, "index");
-    static final File STAGE_ADD_FILE = Utils.join(INDEX_DIR, "stage_for_add");
-    static final File STAGE_RM_FILE = Utils.join(INDEX_DIR, "stage_for_rm");
-    static final File REFS_DIR = Utils.join(GITLET_DIR, "refs");
-    static final File BRANCHES_DIR = Utils.join(REFS_DIR, "branches");
     private static Stage stageForAddition;
     private static Stage stageForRemoval;
-    // modify your preferred default branch here!!
-    private static final String DEFAULT_BRANCH = "master";
 
     /*
      *   .gitlet
@@ -38,59 +26,31 @@ public class GitletRepository {
      *      |--stage
      */
     public static void init() throws GitletException {
-        // TODO
         if (GITLET_DIR.exists()) {
             throw new GitletException("A Gitlet version-control system already exists in the current directory.");
         }
         GITLET_DIR.mkdir();
         OBJ_DIR.mkdir();
-        BLOB_DIR.mkdir();
-        COMMIT_DIR.mkdir();
-        INDEX_DIR.mkdir();
-        REFS_DIR.mkdir();
-        BRANCHES_DIR.mkdir();
-        try {
-            HEAD_FILE.createNewFile();
-            STAGE_ADD_FILE.createNewFile();
-            STAGE_RM_FILE.createNewFile();
-        } catch (Exception e) {
-            System.err.println("fail to create " + String.valueOf(HEAD_FILE));
-        }
 
-        Stage stageForAddition = new Stage();
-        Stage stageForRemoval = new Stage();
-        Utils.writeObject(STAGE_ADD_FILE, stageForAddition);
-        Utils.writeObject(STAGE_RM_FILE, stageForRemoval);
+        Blob.init();
+        Commit.init();
+        Stage.init();
+        Branch.init();
 
-        Utils.writeContents(HEAD_FILE, DEFAULT_BRANCH);
-        Commit initCommit = new Commit();
-        initCommit.save();
-
-        File BRANCH_FILE = Utils.join(BRANCHES_DIR, DEFAULT_BRANCH);
-        Utils.writeContents(BRANCH_FILE, initCommit.getUID());
+        stageForAddition = new Stage();
+        stageForRemoval = new Stage();
+        Utils.writeObject(Stage.STAGE_ADD_FILE, stageForAddition);
+        Utils.writeObject(Stage.STAGE_RM_FILE, stageForRemoval);
     }
 
     private static void popStage() {
-        stageForAddition = Utils.readObject(STAGE_ADD_FILE, Stage.class);
-        stageForRemoval = Utils.readObject(STAGE_RM_FILE, Stage.class);
+        stageForAddition = Utils.readObject(Stage.STAGE_ADD_FILE, Stage.class);
+        stageForRemoval = Utils.readObject(Stage.STAGE_RM_FILE, Stage.class);
     }
 
     private static void pushStage() {
-        Utils.writeObject(STAGE_ADD_FILE, stageForAddition);
-        Utils.writeObject(STAGE_RM_FILE, stageForRemoval);
-    }
-
-    private static Commit popHead() {
-        String head = Utils.readContentsAsString(HEAD_FILE);
-        File HEAD_BRANCH = Utils.join(BRANCHES_DIR, head);
-        String uid = Utils.readContentsAsString(HEAD_BRANCH);
-        return Commit.fromFileByUID(uid);
-    }
-
-    private static void updateHead(String uid) {
-        String head = Utils.readContentsAsString(HEAD_FILE);
-        File HEAD_BRANCH = Utils.join(BRANCHES_DIR, head);
-        Utils.writeContents(HEAD_BRANCH, uid);
+        Utils.writeObject(Stage.STAGE_ADD_FILE, stageForAddition);
+        Utils.writeObject(Stage.STAGE_RM_FILE, stageForRemoval);
     }
 
     public static void add(String path) throws GitletException {
@@ -101,7 +61,7 @@ public class GitletRepository {
             throw new GitletException("File does not exist.");
         }
         Blob blob = new Blob(file);
-        Commit curCommit = popHead();
+        Commit curCommit = Branch.popHead();
 
         // 文件未变更，从暂存区中移除
         if (curCommit.contains(blob.getPath())
@@ -111,7 +71,7 @@ public class GitletRepository {
             blob.save();
             stageForAddition.add(blob);
         }
-        // 如果文件被标记为删除，移除该标记
+         //如果文件被标记为删除，移除该标记
         stageForRemoval.remove(blob);
 
 
@@ -128,7 +88,7 @@ public class GitletRepository {
             throw new GitletException("No changes added to the commit.");
         }
         // 取出当前 Commit
-        Commit curCommit = popHead();
+        Commit curCommit = Branch.popHead();
         // 设置新 Commit 的父节点为 当前 Commit
         ArrayList<String> parents = new ArrayList<>();
         parents.add(curCommit.getUID());
@@ -145,7 +105,25 @@ public class GitletRepository {
         // 构建新的 Commit
         Commit newCommit = new Commit(msg, blobMap, parents);
         newCommit.save();
-        updateHead(newCommit.getUID());
+        Branch.updateHead(newCommit.getUID());
+
+        pushStage();
+    }
+
+    public static void rm(String path) throws GitletException {
+        File file = Paths.get(path).isAbsolute() ? new File(path) : Utils.join(CWD, path);
+        popStage();
+        Commit curCommit = Branch.popHead();
+
+        if (stageForAddition.contains(file.getPath())) {
+            stageForAddition.remove(file.getPath());
+        } else if (curCommit.contains(file.getPath())) {
+            Blob blob = Blob.fromFile(curCommit.get(file.getPath()));
+            stageForRemoval.add(blob);
+            Utils.restrictedDelete(file);
+        } else {
+            throw new GitletException("No reason to remove the file.");
+        }
 
         pushStage();
     }
@@ -167,7 +145,7 @@ public class GitletRepository {
 
     public static void checkoutFile(String path) throws GitletException {
         File file = Paths.get(path).isAbsolute() ? new File(path) : Utils.join(CWD, path);
-        Commit curCommit = popHead();
+        Commit curCommit = Branch.popHead();
         if (!curCommit.contains(file.getPath())) {
             throw new GitletException("File does not exist in that commit.");
         }
@@ -189,51 +167,180 @@ public class GitletRepository {
     }
 
     public static void checkoutBranch(String branchName) {
-        //  TODO: Checkpoint 过了之后再来完成
+        popStage();
+        if (!Branch.exist(branchName)) {
+            throw new GitletException("No such branch exists.");
+        }
+        if (Branch.curBranch().equals(branchName)) {
+            throw new GitletException("No need to checkout the current branch.");
+        }
+        if (!untrackedFiles().isEmpty()) {
+            throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+
+        Commit newCommit = Branch.popBranch(branchName);
+        for (String uid : newCommit.dCloneBlobMap().values()) {
+            Blob blob = Blob.fromFile(uid);
+            blob.writeBack();
+        }
+
+        for (String name : Utils.plainFilenamesIn(CWD)) {
+            File file = Utils.join(CWD, name);
+            if (!newCommit.contains(file.getPath())) {
+                Utils.restrictedDelete(file);
+            }
+        }
+
+        stageForAddition.clear();
+        stageForRemoval.clear();
+        Branch.checkout(branchName);
+
+        pushStage();
     }
 
     public static void log() {
-        Commit curCommit = popHead();
+        Commit curCommit = Branch.popHead();
         do {
             System.out.print(curCommit);
             curCommit = curCommit.getFirstParent();
         } while (curCommit != null);
     }
 
+    public static void global_log() {
+        for (Commit commit : Commit.fromFileAll()) {
+            System.out.println(commit);
+        }
+    }
+
+    public static void find(String commitMessage) throws GitletException {
+        boolean found = false;
+        for (Commit commit : Commit.fromFileAll()) {
+            if (commit.getMessage().equals(commitMessage)) {
+                System.out.println(commit.getUID());
+                found = true;
+            }
+        }
+
+        if (!found) {
+            throw new GitletException("Found no commit with that message.");
+        }
+    }
+
     public static void status() {
         popStage();
-
-        System.out.println("=== Branches ===");
-        String headBranchName = Utils.readContentsAsString(HEAD_FILE);
-        for (String branchName : Utils.plainFilenamesIn(BRANCHES_DIR)) {
-            if (branchName.equals(headBranchName)) {
-                System.out.print("*");
-            }
-            System.out.println(branchName);
-        }
-        System.out.println("");
+        ArrayList<String> names = new ArrayList<>();
+        Branch.status();
 
         System.out.println("=== Staged Files ===");
         for (String uid : stageForAddition.getBlobMap().values()) {
             Blob blob = Blob.fromFile(uid);
-            System.out.println(blob.getFile().getName());
+            names.add((blob.getFile().getName()));
+        }
+        Collections.sort(names);
+        for (String name : names) {
+            System.out.println(name);
         }
         System.out.println("");
 
         System.out.println("=== Removed Files ===");
+        names.clear();
         for (String uid : stageForRemoval.getBlobMap().values()) {
             Blob blob = Blob.fromFile(uid);
-            System.out.println(blob.getFile().getName());
+            names.add(blob.getFile().getName());
+        }
+        Collections.sort(names);
+        for (String name : names) {
+            System.out.println(name);
         }
         System.out.println("");
 
         System.out.println("=== Modifications Not Staged For Commit ===");
+        names = modifiedFiles();
+        Collections.sort(names);
+        for (String name : names) {
+            System.out.print(name);
+            File file = Utils.join(CWD, name);
+            if (file.exists()) {
+                System.out.println(" (modified)");
+            } else {
+                System.out.println(" (deleted)");
+            }
+        }
         System.out.println("");
 
         System.out.println("=== Untracked Files ===");
+        names = untrackedFiles();
+        Collections.sort(names);
+        for (String name : names) {
+            System.out.println(name);
+        }
         System.out.println("");
 
         pushStage();
     }
+
+    public static void branch(String branchName) throws GitletException {
+        if (Branch.exist(branchName)) {
+            throw new GitletException("A branch with that name already exists.");
+        }
+        Branch.create(branchName);
+    }
+
+    /**        CWD Monitor Methods     **/
+    private static ArrayList<String> untrackedFiles() {
+        Commit curCommit = Branch.popHead();
+
+        ArrayList<String> res = new ArrayList<>();
+
+        for (String name : Utils.plainFilenamesIn(CWD)) {
+            File file = Utils.join(CWD, name);
+            // The final category (“Untracked Files”) is for files present in
+            // the working directory but neither staged for addition nor tracked.
+            if (!curCommit.contains(file.getPath()) && !stageForAddition.contains(file.getPath())) {
+                res.add(name);
+            }
+        }
+
+        return res;
+    }
+
+    private static ArrayList<String> modifiedFiles() {
+        Commit curCommit = Branch.popHead();
+
+        ArrayList<String> res = new ArrayList<>();
+
+        for (String name : Utils.plainFilenamesIn(CWD)) {
+            File file = Utils.join(CWD, name);
+            Blob blob = new Blob(file);
+            // 1: Tracked in the current commit, changed in the working directory, but not staged;
+            if (curCommit.contains(file.getPath()) && !stageForAddition.contains(file.getPath())
+                && !curCommit.get(file.getPath()).equals(blob.getUID())) {
+                res.add(name);
+            }
+            // 2: Staged for addition, but with different contents than in the working directory; or
+            if (stageForAddition.contains(file.getPath())
+                    && !stageForAddition.get(file.getPath()).equals(blob.getUID())) {
+                res.add(name);
+            }
+        }
+
+        // 3: Staged for addition, but deleted in the working directory;
+        for (String path : stageForAddition.getBlobMap().keySet()) {
+            File file = new File(path);
+            if (!file.exists()) {
+                res.add(file.getName());
+            }
+        }
+
+        // 4: Not staged for removal, but tracked in the current commit and deleted from the working directory.
+        for (String path : curCommit.dCloneBlobMap().keySet()) {
+            File file = new File(path);
+            if (!stageForRemoval.contains(path) && !file.exists()) {
+                res.add(file.getName());
+            }
+        }
+        return res;
+    }
+
 
 }

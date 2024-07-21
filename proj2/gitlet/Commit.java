@@ -2,6 +2,7 @@ package gitlet;
 
 // TODO: any imports you need here
 
+import java.io.File;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -24,7 +25,7 @@ public class Commit implements Serializable {
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
      */
-
+    static final File COMMIT_DIR = Utils.join(GitletRepository.OBJ_DIR, "commits");
     private static DateFormat dateFormat =
             new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
 
@@ -49,6 +50,10 @@ public class Commit implements Serializable {
         this.timeStamp = dateFormat.format(new Date(0));
     }
 
+    public static void init() {
+        COMMIT_DIR.mkdir();
+    }
+
     public boolean contains(String path) {
         return blobMap.containsKey(path);
     }
@@ -67,6 +72,9 @@ public class Commit implements Serializable {
 
         sb.append("===\n");
         sb.append("commit " + UID + "\n");
+        if (parents.size() > 1) {
+            sb.append("Merge: " + parents.get(0).substring(0,7) + " " + parents.get(1).substring(0,7) + "\n");
+        }
         sb.append("Date: " + timeStamp + "\n");
         sb.append(message + "\n");
         sb.append("\n");
@@ -75,25 +83,38 @@ public class Commit implements Serializable {
     }
 
     public void save() {
-        Utils.writeObject(Utils.join(GitletRepository.COMMIT_DIR, UID), this);
+        Utils.writeObject(Utils.join(COMMIT_DIR, UID), this);
     }
 
     public String getUID() {
         return UID;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
     public static Commit fromFileByUID(String UID) {
-        return Utils.readObject(Utils.join(GitletRepository.COMMIT_DIR, UID), Commit.class);
+        return Utils.readObject(Utils.join(COMMIT_DIR, UID), Commit.class);
     }
 
     public static Commit fromFileByPrefixUID(String prefix) {
-        for (String uid : Utils.plainFilenamesIn(GitletRepository.COMMIT_DIR)) {
+        for (String uid : Utils.plainFilenamesIn(COMMIT_DIR)) {
             if (uid.startsWith(prefix)) {
-                return Utils.readObject(Utils.join(GitletRepository.COMMIT_DIR, uid), Commit.class);
+                return Utils.readObject(Utils.join(COMMIT_DIR, uid), Commit.class);
             }
         }
 
         return null;
+    }
+
+    public static ArrayList<Commit> fromFileAll() {
+        ArrayList<Commit> res = new ArrayList<>();
+        for (String uid : Utils.plainFilenamesIn(COMMIT_DIR)) {
+            res.add(Utils.readObject(Utils.join(COMMIT_DIR, uid), Commit.class));
+        }
+
+        return res;
     }
 
     @Override
