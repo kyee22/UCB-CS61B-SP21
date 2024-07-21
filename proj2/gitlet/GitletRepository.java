@@ -409,7 +409,7 @@ public class GitletRepository {
         for (String path : curCommit.dCloneBlobMap().keySet()) {
             String uid = curCommit.get(path);
             if (lca.contains(path) && givenCommit.contains(path) &&
-                lca.get(path).equals(uid) && !givenCommit.get(uid).equals(uid)) {
+                lca.get(path).equals(uid) && !givenCommit.get(path).equals(uid)) {
                 checkoutCommitFile(givenCommit.getUID(), path);
                 add(path);
             }
