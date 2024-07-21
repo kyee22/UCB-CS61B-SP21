@@ -1,5 +1,6 @@
 package gitlet;
 
+import java.awt.image.CropImageFilter;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -71,6 +72,8 @@ public class GitletRepository {
             blob.save();
             stageForAddition.add(blob);
         }
+        // 如果文件被标记为删除，移除该标记
+        stageForRemoval.remove(blob);
 
 
         pushStage();
@@ -334,6 +337,17 @@ public class GitletRepository {
         }
         if (Branch.curBranch().equals(givenBranchName)) {
             throw new GitletException("Cannot merge a branch with itself.");
+        }
+
+        Commit curCommit = Branch.popHead();
+        Commit givenCommit = Branch.popBranch(givenBranchName);
+        Commit lca = Commit.findLowestCommonAncestor(curCommit, givenCommit);
+
+        if (lca.equals(givenBranchName)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+        } else if (lca.equals(curCommit)) {
+            checkout(givenBranchName);
+            System.out.println("Current branch fast-forwarded.");
         }
 
 

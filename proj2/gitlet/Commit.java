@@ -6,10 +6,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date; // TODO: You'll likely use this in this class
-import java.util.TreeMap;
-import java.util.Locale;
+import java.util.*;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
@@ -129,6 +126,12 @@ public class Commit implements Serializable {
         return UID.equals(((Commit)o).getUID());
     }
 
+    @Override
+    public int hashCode() {
+        return UID != null ? UID.hashCode() : 0;
+    }
+
+
     public TreeMap<String, String> dCloneBlobMap() {
         TreeMap<String, String> res = new TreeMap<>();
         for (String k : blobMap.keySet()) {
@@ -145,4 +148,32 @@ public class Commit implements Serializable {
 
         return Commit.fromFileByUID(parents.get(0));
     }
+
+    public static Commit findLowestCommonAncestor(Commit commit1, Commit commit2) {
+        // Initialize two sets to store the ancestors of each commit
+        Set<String> ancestors1 = new HashSet<>();
+        Set<String> ancestors2 = new HashSet<>();
+
+        // Traverse commit1's history and store all ancestor UIDs in ancestors1
+        Commit currentCommit = commit1;
+        while (currentCommit != null) {
+            ancestors1.add(currentCommit.getUID());
+            currentCommit = currentCommit.getFirstParent();
+        }
+
+        // Traverse commit2's history and store all ancestor UIDs in ancestors2
+        currentCommit = commit2;
+        while (currentCommit != null) {
+            // If commit2's ancestor is also in commit1's ancestors, we found the LCA
+            if (ancestors1.contains(currentCommit.getUID())) {
+                return currentCommit;
+            }
+            ancestors2.add(currentCommit.getUID());
+            currentCommit = currentCommit.getFirstParent();
+        }
+
+        // If no common ancestor is found (which shouldn't happen in a valid Git history)
+        return null;
+    }
+
 }
