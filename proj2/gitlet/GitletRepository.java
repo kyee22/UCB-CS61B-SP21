@@ -398,7 +398,7 @@ public class GitletRepository {
             throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
         }
 
-        if (lca.equals(givenBranchName)) {
+        if (lca.equals(givenCommit)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             return;
         } else if (lca.equals(curCommit)) {
