@@ -71,8 +71,6 @@ public class GitletRepository {
             blob.save();
             stageForAddition.add(blob);
         }
-         //如果文件被标记为删除，移除该标记
-        stageForRemoval.remove(blob);
 
 
         pushStage();
@@ -321,6 +319,23 @@ public class GitletRepository {
         stageForAddition.clear();
         stageForRemoval.clear();
         Branch.updateHead(commit.getUID());
+
+        pushStage();
+    }
+
+    public static void merge(String givenBranchName) throws GitletException {
+        popStage();
+
+        if (!stageForAddition.isEmpty() || !stageForRemoval.isEmpty()) {
+            throw new GitletException("You have uncommitted changes.");
+        }
+        if (!Branch.exist(givenBranchName)) {
+            throw new GitletException("A branch with that name does not exist.");
+        }
+        if (Branch.curBranch().equals(givenBranchName)) {
+            throw new GitletException("Cannot merge a branch with itself.");
+        }
+
 
         pushStage();
     }

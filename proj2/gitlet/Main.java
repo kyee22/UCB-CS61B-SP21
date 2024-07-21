@@ -127,6 +127,15 @@ public class Main {
                 }
                 break;
 
+            case "merge":
+                validateNumArgs(args, 2);
+                validateGitletExist();
+                try {
+                    GitletRepository.merge(args[1]);
+                } catch (GitletException e) {
+                    panic(true, e.getMessage());
+                }
+
             default:
                 panic(true, "No command with that name exists.");
         }

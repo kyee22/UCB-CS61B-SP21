@@ -45,7 +45,7 @@ public class Blob implements Serializable {
     }
 
     public static Blob fromFile(String UID) {
-        return (Blob) Utils.readObject(Utils.join(BLOB_DIR, UID), Blob.class);
+        return Utils.readObject(Utils.join(BLOB_DIR, UID), Blob.class);
     }
 
     public void writeBack() {
