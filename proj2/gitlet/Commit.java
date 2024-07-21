@@ -149,31 +149,58 @@ public class Commit implements Serializable {
         return Commit.fromFileByUID(parents.get(0));
     }
 
+    public Commit getSecondParent() {
+        if (parents.isEmpty() || parents.size() < 2) {
+            return null;
+        }
+
+        return Commit.fromFileByUID(parents.get(1));
+    }
+
     public static Commit findLowestCommonAncestor(Commit commit1, Commit commit2) {
-        // Initialize two sets to store the ancestors of each commit
+        // Initialize sets to store the ancestors of each commit
         Set<String> ancestors1 = new HashSet<>();
         Set<String> ancestors2 = new HashSet<>();
 
+        // Use a queue to traverse all ancestors of commit1 and commit2
+        Queue<Commit> queue1 = new LinkedList<>();
+        Queue<Commit> queue2 = new LinkedList<>();
+
+        queue1.add(commit1);
+        queue2.add(commit2);
+
         // Traverse commit1's history and store all ancestor UIDs in ancestors1
-        Commit currentCommit = commit1;
-        while (currentCommit != null) {
-            ancestors1.add(currentCommit.getUID());
-            currentCommit = currentCommit.getFirstParent();
+        while (!queue1.isEmpty()) {
+            Commit currentCommit = queue1.poll();
+            if (currentCommit != null && ancestors1.add(currentCommit.getUID())) {
+                if (currentCommit.getFirstParent() != null) {
+                    queue1.add(currentCommit.getFirstParent());
+                }
+                if (currentCommit.getSecondParent() != null) {
+                    queue1.add(currentCommit.getSecondParent());
+                }
+            }
         }
 
         // Traverse commit2's history and store all ancestor UIDs in ancestors2
-        currentCommit = commit2;
-        while (currentCommit != null) {
-            // If commit2's ancestor is also in commit1's ancestors, we found the LCA
-            if (ancestors1.contains(currentCommit.getUID())) {
-                return currentCommit;
+        while (!queue2.isEmpty()) {
+            Commit currentCommit = queue2.poll();
+            if (currentCommit != null) {
+                if (ancestors1.contains(currentCommit.getUID())) {
+                    return currentCommit;
+                }
+                if (ancestors2.add(currentCommit.getUID())) {
+                    if (currentCommit.getFirstParent() != null) {
+                        queue2.add(currentCommit.getFirstParent());
+                    }
+                    if (currentCommit.getSecondParent() != null) {
+                        queue2.add(currentCommit.getSecondParent());
+                    }
+                }
             }
-            ancestors2.add(currentCommit.getUID());
-            currentCommit = currentCommit.getFirstParent();
         }
 
         // If no common ancestor is found (which shouldn't happen in a valid Git history)
         return null;
     }
-
 }
