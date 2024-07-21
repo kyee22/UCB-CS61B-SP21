@@ -400,9 +400,11 @@ public class GitletRepository {
 
         if (lca.equals(givenBranchName)) {
             System.out.println("Given branch is an ancestor of the current branch.");
+            return;
         } else if (lca.equals(curCommit)) {
             checkoutBranch(givenBranchName);
             System.out.println("Current branch fast-forwarded.");
+            return;
         }
 
         // case 1:
