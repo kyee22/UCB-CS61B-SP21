@@ -1,6 +1,5 @@
 package gitlet;
 
-import java.awt.image.CropImageFilter;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ public class GitletRepository {
     /** Main metadata folder. */
     static final File GITLET_DIR = Utils.join(CWD, ".gitlet");
     static final File OBJ_DIR = Utils.join(GITLET_DIR, "objects");
+    static final File REFS_DIR = Utils.join(GITLET_DIR, "refs");
     private static Stage stageForAddition;
     private static Stage stageForRemoval;
 
@@ -33,11 +33,13 @@ public class GitletRepository {
         }
         GITLET_DIR.mkdir();
         OBJ_DIR.mkdir();
+        REFS_DIR.mkdir();
 
         Blob.init();
         Commit.init();
         Stage.init();
         Branch.init();
+        RemoteRepository.init();
 
         stageForAddition = new Stage();
         stageForRemoval = new Stage();
@@ -230,7 +232,8 @@ public class GitletRepository {
         blob.writeBack();
     }
 
-    public static void checkoutBranch(String branchName) {
+    public static void checkoutBranch(String _branchName) {
+        String branchName = _branchName.replace("/", "_");
         if (!Branch.exist(branchName)) {
             throw new GitletException("No such branch exists.");
         }
@@ -344,7 +347,8 @@ public class GitletRepository {
         Branch.create(branchName);
     }
 
-    public static void rm_branch(String branchName) throws GitletException {
+    public static void rm_branch(String _branchName) throws GitletException {
+        String branchName = _branchName.replace("/", "_");
         if (!Branch.exist(branchName)) {
             throw new GitletException("A branch with that name does not exist.");
         }
@@ -380,7 +384,8 @@ public class GitletRepository {
         Branch.updateHead(commit.getUID());
     }
 
-    public static void merge(String givenBranchName) throws GitletException {
+    public static void merge(String _givenBranchName) throws GitletException {
+        String givenBranchName = _givenBranchName.replace("/", "_");
         if (!stageForAddition.isEmpty() || !stageForRemoval.isEmpty()) {
             throw new GitletException("You have uncommitted changes.");
         }
@@ -468,7 +473,7 @@ public class GitletRepository {
         if (mergeConflict) {
             System.out.println("Encountered a merge conflict.");
         }
-        String msg = "Merged " + givenBranchName + " into " + Branch.curBranch() + ".";
+        String msg = "Merged " + givenBranchName.replace("_", "/") + " into " + Branch.curBranch() + ".";
         commit(msg, givenCommit);
     }
 
@@ -566,4 +571,5 @@ public class GitletRepository {
         }
         return res;
     }
+
 }

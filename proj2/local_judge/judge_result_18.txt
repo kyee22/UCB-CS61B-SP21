@@ -1,0 +1,186 @@
+"make" -C gitlet default
+make[1]: Entering directory '/mnt/e/UCB CS61B/UCB-CS61B-SP21/proj2/gitlet'
+make[1]: Nothing to be done for 'default'.
+make[1]: Leaving directory '/mnt/e/UCB CS61B/UCB-CS61B-SP21/proj2/gitlet'
+"make" -C testing PYTHON=python3 TESTER_FLAGS="--verbose" check
+make[1]: Entering directory '/mnt/e/UCB CS61B/UCB-CS61B-SP21/proj2/testing'
+Testing application gitlet.Main...
+CLASSPATH="$(pwd)/..::;$(pwd)/..;" python3 tester.py --verbose samples/*.in student_tests/*.in *.in
+test01-init:
+Testing directory: test01-init_0
++ # Basic initialization
++ > init
++ E .gitlet
+OK
+test02-basic-checkout:
+Testing directory: test02-basic-checkout_0
++ # A simple test of adding, committing, modifying, and checking out.
++ > init
++ + wug.txt wug.txt
++ > add wug.txt
++ > commit "added wug"
++ + wug.txt notwug.txt
++ # Must change
++ > checkout -- wug.txt
++ = wug.txt wug.txt
+OK
+test03-basic-log:
+Testing directory: test03-basic-log_0
++ # Set up a simple chain of commits and check their log.
++ I definitions.inc
++ # Standard definitions
++ D DATE "Date: \w\w\w \w\w\w \d+ \d\d:\d\d:\d\d \d\d\d\d [-+]\d\d\d\d"
++ # A status log header RE.  Captures the commit id in its sole group.
++ D COMMIT_HEAD "commit ([a-f0-9]+)[ \t]*\n(?:Merge:\s+[0-9a-f]{7}\s+[0-9a-f]{7}[ ]  *\n)?Date: \w\w\w \w\w\w \d+ \d\d:\d\d:\d\d \d\d\d\d [-+]\d\d\d\d"
++ # A full log entry.  Captures the entry. Assume logs messages don't contain
++ # "==="
++ D COMMIT_LOG "(===[ ]*\ncommit [a-f0-9]+[ ]*\n(?:Merge:\s+[0-9a-f]{7}\s+[0-9a-f]{7}[ ]*\n)?Date: \w\w\w \w\w\w \d+ \d\d:\d\d:\d\d \d\d\d\d [-+]\d\d\d\d[ ]*\n(?:.|\n)*?(?=\Z|\n===))"
++ # An arbitrary line of text (works even with ?s)
++ D ARBLINE "[^\n]*(?=\n|\Z)"
++ # Zero or more arbitrary full lines of text.
++ D ARBLINES "(?:(?:.|\n)*(?:\n|\Z)|\A|\Z)"
++ > init
++ + wug.txt wug.txt
++ > add wug.txt
++ > commit "added wug"
++ > log
+- ===
+- commit bf7449902e32a172fb930cc7a330da38dafd7f31
+- Date: Mon Jul 22 13:35:32 2024 +0800
+- added wug
+- 
+- ===
+- commit 89c5bf651e88b25e209cf700a46a187b01c4952d
+- Date: Thu Jan 1 08:00:00 1970 +0800
+- initial commit
+- 
+OK
+test04-prev-checkout:
+Testing directory: test04-prev-checkout_0
++ # Check that we can check out a previous version.
++ I definitions.inc
++ # Standard definitions
++ D DATE "Date: \w\w\w \w\w\w \d+ \d\d:\d\d:\d\d \d\d\d\d [-+]\d\d\d\d"
++ # A status log header RE.  Captures the commit id in its sole group.
++ D COMMIT_HEAD "commit ([a-f0-9]+)[ \t]*\n(?:Merge:\s+[0-9a-f]{7}\s+[0-9a-f]{7}[ ]  *\n)?Date: \w\w\w \w\w\w \d+ \d\d:\d\d:\d\d \d\d\d\d [-+]\d\d\d\d"
++ # A full log entry.  Captures the entry. Assume logs messages don't contain
++ # "==="
++ D COMMIT_LOG "(===[ ]*\ncommit [a-f0-9]+[ ]*\n(?:Merge:\s+[0-9a-f]{7}\s+[0-9a-f]{7}[ ]*\n)?Date: \w\w\w \w\w\w \d+ \d\d:\d\d:\d\d \d\d\d\d [-+]\d\d\d\d[ ]*\n(?:.|\n)*?(?=\Z|\n===))"
++ # An arbitrary line of text (works even with ?s)
++ D ARBLINE "[^\n]*(?=\n|\Z)"
++ # Zero or more arbitrary full lines of text.
++ D ARBLINES "(?:(?:.|\n)*(?:\n|\Z)|\A|\Z)"
++ > init
++ + wug.txt wug.txt
++ > add wug.txt
++ > commit "version 1 of wug.txt"
++ + wug.txt notwug.txt
++ > add wug.txt
++ > commit "version 2 of wug.txt"
++ = wug.txt notwug.txt
++ # Each ${COMMIT_HEAD} captures its commit UID.
++ > log
+- ===
+- commit 83b3a13a90a7fa17381902176337721b36a34624
+- Date: Mon Jul 22 13:35:33 2024 +0800
+- version 2 of wug.txt
+- 
+- ===
+- commit 25da6bc8cb531c066679d9046ccb186dbd4a81f1
+- Date: Mon Jul 22 13:35:33 2024 +0800
+- version 1 of wug.txt
+- 
+- ===
+- commit 89c5bf651e88b25e209cf700a46a187b01c4952d
+- Date: Thu Jan 1 08:00:00 1970 +0800
+- initial commit
+- 
++ # UID of second version
++ D UID2 "83b3a13a90a7fa17381902176337721b36a34624"
++ # UID of current version
++ D UID1 "25da6bc8cb531c066679d9046ccb186dbd4a81f1"
++ > checkout 25da6bc8cb531c066679d9046ccb186dbd4a81f1 -- wug.txt
++ = wug.txt wug.txt
++ > checkout 83b3a13a90a7fa17381902176337721b36a34624 -- wug.txt
++ = wug.txt notwug.txt
+OK
+test43-criss-cross-merge-b:
+Testing directory: test43-criss-cross-merge-b_0
++ # As for test43-criss-cross-merge.in, but we switch the roles of the parents
++ # in the first two merges.
++ # Criss-cross merge.
++ > init
++ > branch given
++ > checkout given
++ + f.txt wug.txt
++ > add f.txt
++ > commit "Add f.txt containing wug.txt"
++ > branch B
++ > checkout master
++ + f.txt notwug.txt
++ > add f.txt
++ > commit "Add f.txt containing notwug.txt"
++ > checkout given
++ > merge master
+- Encountered a merge conflict.
++ = f.txt conflict6.txt
++ + f.txt notwug.txt
++ > add f.txt
++ > commit "Reset f to notwug.txt"
++ > rm f.txt
++ > commit "given now empty."
++ > checkout B
++ + g.txt wug2.txt
++ > add g.txt
++ > commit "Added g.txt"
++ > checkout master
++ > merge B
+- Encountered a merge conflict.
++ = f.txt conflict3.txt
++ + f.txt wug.txt
++ > add f.txt
++ > commit "Reset f to wug.txt"
++ > merge given
+- Encountered a merge conflict.
++ = f.txt conflict5.txt
++ = g.txt wug2.txt
+OK
+test43-criss-cross-merge:
+Testing directory: test43-criss-cross-merge_0
++ # Criss-cross merge.
++ > init
++ > branch given
++ + f.txt wug.txt
++ > add f.txt
++ > commit "Add f.txt containing wug.txt"
++ > checkout given
++ + f.txt notwug.txt
++ > add f.txt
++ > commit "Add f.txt containing notwug.txt"
++ > branch B
++ > merge master
+- Encountered a merge conflict.
++ = f.txt conflict3.txt
++ + f.txt notwug.txt
++ > add f.txt
++ > commit "Reset f to notwug.txt"
++ > rm f.txt
++ > commit "given now empty."
++ > checkout master
++ + g.txt wug2.txt
++ > add g.txt
++ > commit "Added g.txt"
++ > merge B
+- Encountered a merge conflict.
++ = f.txt conflict4.txt
++ + f.txt wug.txt
++ > add f.txt
++ > commit "Reset f to wug.txt"
++ > merge given
+- Encountered a merge conflict.
++ = f.txt conflict5.txt
++ = g.txt wug2.txt
+OK
+
+Ran 6 tests. All passed.
+make[1]: Leaving directory '/mnt/e/UCB CS61B/UCB-CS61B-SP21/proj2/testing'

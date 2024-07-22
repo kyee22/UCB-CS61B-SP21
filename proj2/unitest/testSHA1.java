@@ -118,5 +118,9 @@ public class testSHA1 {
         mp.remove("2");
         System.out.println(Utils.plainFilenamesIn(TEST));
         System.out.println(Utils.plainFilenamesIn(CWD));
+
+        String s = (new File(System.getProperty("user.dir"))).getParent();
+        System.out.println(s);
+        System.out.println("hi");
     }
 }

@@ -9,14 +9,12 @@ public class Branch {
 
     static final File HEAD_FILE = Utils.join(GitletRepository.GITLET_DIR, "HEAD");
 
-    static final File REFS_DIR = Utils.join(GitletRepository.GITLET_DIR, "refs");
-    static final File BRANCHES_DIR = Utils.join(REFS_DIR, "branches");
+    static final File BRANCHES_DIR = Utils.join(GitletRepository.REFS_DIR, "branches");
 
     // modify your preferred default branch here!!
     private static final String DEFAULT_BRANCH = "master";
 
     public static void init() {
-        REFS_DIR.mkdir();
         BRANCHES_DIR.mkdir();
         try {
             HEAD_FILE.createNewFile();

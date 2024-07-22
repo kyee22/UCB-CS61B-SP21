@@ -1,8 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.IOException;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author     Arren @ Beihang University
@@ -15,7 +14,7 @@ public class Main {
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
         panic(args.length <= 0, "Please enter a command.");
         String firstArg = args[0];
 
@@ -49,7 +48,24 @@ public class Main {
                 }
                 break;
 
+            case "add-remote":
+            case "rm-remote":
+            case "push":
+            case "fetch":
+            case "pull":
+                try {
+                    RemoteRepository.entry(args);
+                } catch (GitletException e) {
+                    panic(true, e.getMessage());
+                }
+                break;
+
             default:
+                //String[] cmds = {"init"};
+                //File file = new File(System.getProperty("user.dir"));
+                //String path = file.getParentFile().getPath();
+                //System.out.println(path);
+                //Control.executeInDirectory(path, cmds);
                 panic(true, "No command with that name exists.");
         }
     }

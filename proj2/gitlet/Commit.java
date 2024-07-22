@@ -9,15 +9,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
  *
- *  @author TODO
+ *  @author Arren Kuang
  */
 public class Commit implements Serializable {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
@@ -33,7 +29,6 @@ public class Commit implements Serializable {
     private ArrayList<String> parents;
     private String UID;
 
-    /* TODO: fill in the rest of this class. */
     public Commit(String msg, TreeMap<String, String> blobMap, ArrayList<String> parents) {
         this.message = msg;
         this.timeStamp = dateFormat.format(new Date());
@@ -110,7 +105,6 @@ public class Commit implements Serializable {
         for (String uid : Utils.plainFilenamesIn(COMMIT_DIR)) {
             res.add(Utils.readObject(Utils.join(COMMIT_DIR, uid), Commit.class));
         }
-
         return res;
     }
 
@@ -122,7 +116,6 @@ public class Commit implements Serializable {
         if (o == null || !(o instanceof Commit)) {
             return false;
         }
-
         return UID.equals(((Commit)o).getUID());
     }
 
@@ -137,7 +130,6 @@ public class Commit implements Serializable {
         for (String k : blobMap.keySet()) {
             res.put(k, blobMap.get(k));
         }
-
         return res;
     }
 
@@ -145,7 +137,6 @@ public class Commit implements Serializable {
         if (parents.isEmpty()) {
             return null;
         }
-
         return Commit.fromFileByUID(parents.get(0));
     }
 
@@ -153,7 +144,6 @@ public class Commit implements Serializable {
         if (parents.isEmpty() || parents.size() < 2) {
             return null;
         }
-
         return Commit.fromFileByUID(parents.get(1));
     }
 
@@ -174,7 +164,6 @@ public class Commit implements Serializable {
             }
             if (curCommit.getFirstParent() != null) {
                 queue.add(curCommit.getFirstParent());
-
             }
             if (curCommit.getSecondParent() != null) {
                 queue.add(curCommit.getSecondParent());
