@@ -14,7 +14,7 @@ public class Main {
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         panic(args.length <= 0, "Please enter a command.");
         String firstArg = args[0];
 
@@ -61,11 +61,6 @@ public class Main {
                 break;
 
             default:
-                //String[] cmds = {"init"};
-                //File file = new File(System.getProperty("user.dir"));
-                //String path = file.getParentFile().getPath();
-                //System.out.println(path);
-                //Control.executeInDirectory(path, cmds);
                 panic(true, "No command with that name exists.");
         }
     }
