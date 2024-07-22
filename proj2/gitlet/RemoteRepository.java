@@ -114,15 +114,34 @@ public class RemoteRepository {
 
         pushObjects(remotePath);
         pushBranch(remotePath, branchName, curCommit);
-
         File remoteCwd = remoteGielet.getParentFile();
-        String[] cmds = {"reset", curCommit.getUID()};
-        try {
-            executeInDirectory(remoteCwd.getPath(), cmds);
-        } catch (Exception e) {
-            System.out.println(e);
+
+        remoteCommit = headFromRemoteBranch(remotePath, branchName);
+        for (String path : remoteCommit.dCloneBlobMap().keySet()) {
+            File file = new File(path);
+            String uid = remoteCommit.dCloneBlobMap().get(path);
+            String name = file.getName();
+            file = Utils.join(remotePath, "objects", "blobs", uid);
+            Blob blob = Utils.readObject(file, Blob.class);
+            File target = Utils.join(remoteCwd, name);
+            Utils.writeContents(target, blob.getContentAsString());
         }
 
+        for (String name : Utils.plainFilenamesIn(remoteCwd)) {
+            File file = Utils.join(GitletRepository.CWD, name);
+            String path = file.getPath();
+            if (!remoteCommit.contains(path)) {
+                file = Utils.join(remoteCwd, name);
+                file.delete();
+            }
+        }
+
+        Stage stage = new Stage();
+        File file = Utils.join(remotePath, "index", "stage_for_add");
+        Utils.writeObject(file, stage);
+        stage = new Stage();
+        file = Utils.join(remotePath, "index", "stage_for_rm");
+        Utils.writeObject(file, stage);
     }
 
     private static void fetch(String remoteName, String branchName) throws GitletException {
@@ -266,61 +285,5 @@ public class RemoteRepository {
         Utils.writeContents(remoteHeadFile, branchName);
         File remoteBranchFile = Utils.join(path, "refs", "branches", branchName);
         Utils.writeContents(remoteBranchFile, commit.getUID());
-    }
-
-    public static void executeInDirectory(String cwd, String[] args) throws IOException, InterruptedException {
-        URL resource = RemoteRepository.class.getResource("Main.class");
-        File projDirectory = null;
-        if (resource == null) {
-            System.out.println("Resource not found!");
-            return;
-        }
-
-        try {
-            // 解析URL为URI并获取路径
-            File currentFile = new File(resource.toURI());
-            // 获取到gitlet目录的父目录，也就是proj目录
-            projDirectory = currentFile.getParentFile().getParentFile(); // 假设 Main.class 在 proj/gitlet/ 目录下
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        // 构建命令
-        List<String> command = new ArrayList<>();
-        command.add("java");
-        command.add("-cp");
-        command.add(projDirectory.getPath());  // 项目目录的绝对路径
-        command.add("gitlet.Main");
-        command.addAll(Arrays.asList(args));
-        //System.out.println("cp:" + projDirectory.getPath());
-
-        // 创建ProcessBuilder
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.directory(new File(cwd));
-
-        // 启动进程
-        Process process = pb.start();
-
-        // 获取子进程的输出
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-        }
-
-        // 获取子进程的错误输出
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.err.println(line);
-            }
-        }
-
-        // 等待进程结束
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
-            throw new RuntimeException("Gitlet command failed with exit code " + exitCode);
-        }
     }
 }
