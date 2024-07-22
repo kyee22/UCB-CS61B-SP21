@@ -127,14 +127,14 @@ public class RemoteRepository {
             Utils.writeContents(target, blob.getContentAsString());
         }
 
-        for (String name : Utils.plainFilenamesIn(remoteCwd)) {
-            File file = Utils.join(GitletRepository.CWD, name);
-            String path = file.getPath();
-            if (!remoteCommit.contains(path)) {
-                file = Utils.join(remoteCwd, name);
-                file.delete();
-            }
-        }
+        //for (String name : Utils.plainFilenamesIn(remoteCwd)) {
+        //    File file = Utils.join(GitletRepository.CWD, name);
+        //    String path = file.getPath();
+        //    if (!remoteCommit.contains(path)) {
+        //        file = Utils.join(remoteCwd, name);
+        //        file.delete();
+        //    }
+        //}
 
         Stage stage = new Stage();
         File file = Utils.join(remotePath, "index", "stage_for_add");
