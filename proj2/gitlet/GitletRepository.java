@@ -566,6 +566,4 @@ public class GitletRepository {
         }
         return res;
     }
-
-
 }

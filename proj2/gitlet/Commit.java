@@ -158,49 +158,43 @@ public class Commit implements Serializable {
     }
 
     public static Commit findLowestCommonAncestor(Commit commit1, Commit commit2) {
-        // Initialize sets to store the ancestors of each commit
-        Set<String> ancestors1 = new HashSet<>();
-        Set<String> ancestors2 = new HashSet<>();
+        HashMap<Commit, Integer> distances = new HashMap<>();
+        dfs(commit1, 0, distances);
 
-        // Use a queue to traverse all ancestors of commit1 and commit2
-        Queue<Commit> queue1 = new LinkedList<>();
-        Queue<Commit> queue2 = new LinkedList<>();
+        LinkedList<Commit> queue = new LinkedList<>();
+        queue.add(commit2);
+        int minDistance = Integer.MAX_VALUE;
+        Commit lca = null;
 
-        queue1.add(commit1);
-        queue2.add(commit2);
+        while (!queue.isEmpty()) {
+            Commit curCommit = queue.poll();
+            if (distances.containsKey(curCommit) && distances.get(curCommit) < minDistance) {
+                lca = curCommit;
+                minDistance = distances.get(curCommit);
+            }
+            if (curCommit.getFirstParent() != null) {
+                queue.add(curCommit.getFirstParent());
 
-        // Traverse commit1's history and store all ancestor UIDs in ancestors1
-        while (!queue1.isEmpty()) {
-            Commit currentCommit = queue1.poll();
-            if (currentCommit != null && ancestors1.add(currentCommit.getUID())) {
-                if (currentCommit.getFirstParent() != null) {
-                    queue1.add(currentCommit.getFirstParent());
-                }
-                if (currentCommit.getSecondParent() != null) {
-                    queue1.add(currentCommit.getSecondParent());
-                }
+            }
+            if (curCommit.getSecondParent() != null) {
+                queue.add(curCommit.getSecondParent());
             }
         }
 
-        // Traverse commit2's history and store all ancestor UIDs in ancestors2
-        while (!queue2.isEmpty()) {
-            Commit currentCommit = queue2.poll();
-            if (currentCommit != null) {
-                if (ancestors1.contains(currentCommit.getUID())) {
-                    return currentCommit;
-                }
-                if (ancestors2.add(currentCommit.getUID())) {
-                    if (currentCommit.getFirstParent() != null) {
-                        queue2.add(currentCommit.getFirstParent());
-                    }
-                    if (currentCommit.getSecondParent() != null) {
-                        queue2.add(currentCommit.getSecondParent());
-                    }
-                }
-            }
+        return lca;
+    }
+
+    private static void dfs(Commit commit, int distance, HashMap<Commit, Integer> distances) {
+        if (commit == null) {
+            return;
         }
 
-        // If no common ancestor is found (which shouldn't happen in a valid Git history)
-        return null;
+        int _distance = distance;
+        if (distances.containsKey(commit) && distances.get(commit) < distance) {
+            _distance = distances.get(commit);
+        }
+        distances.put(commit, _distance);
+        dfs(commit.getFirstParent(), distance + 1, distances);
+        dfs(commit.getSecondParent(), distance + 1, distances);
     }
 }
