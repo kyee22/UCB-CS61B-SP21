@@ -29,8 +29,8 @@ public class GitletRepository {
      */
     public static void init() throws GitletException {
         if (GITLET_DIR.exists()) {
-            throw new GitletException("A Gitlet version-control system " +
-                    "already exists in the current directory.");
+            throw new GitletException("A Gitlet version-control system "
+                    + "already exists in the current directory.");
         }
         GITLET_DIR.mkdir();
         OBJ_DIR.mkdir();
@@ -243,8 +243,8 @@ public class GitletRepository {
             throw new GitletException("No need to checkout the current branch.");
         }
         if (!untrackedFiles().isEmpty()) {
-            throw new GitletException("There is an untracked file in the way; " +
-                    "delete it, or add and commit it first.");
+            throw new GitletException("There is an untracked file in the way; "
+                    + "delete it, or add and commit it first.");
         }
 
         Commit newCommit = Branch.popBranch(branchName);
@@ -367,8 +367,8 @@ public class GitletRepository {
             throw new GitletException("No commit with that id exists.");
         }
         if (!untrackedFiles().isEmpty()) {
-            throw new GitletException("There is an untracked file in the way; " +
-                    "delete it, or add and commit it first.");
+            throw new GitletException("There is an untracked file in the way; "
+                    + "delete it, or add and commit it first.");
         }
 
         for (String uid : commit.dCloneBlobMap().values()) {
@@ -404,7 +404,8 @@ public class GitletRepository {
         Commit givenCommit = Branch.popBranch(givenBranchName);
         Commit lca = Commit.findLowestCommonAncestor(curCommit, givenCommit);
         if (checkMergeOverwrite(lca, curCommit, givenCommit)) {
-            throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+            throw new GitletException("There is an untracked file in the way;"
+                    + " delete it, or add and commit it first.");
         }
 
         if (lca.equals(givenCommit)) {

@@ -40,8 +40,8 @@ public class Branch {
 
     public static void updateHead(String uid) {
         String head = Utils.readContentsAsString(HEAD_FILE);
-        File HEAD_BRANCH = Utils.join(BRANCHES_DIR, head);
-        Utils.writeContents(HEAD_BRANCH, uid);
+        File headBranch = Utils.join(BRANCHES_DIR, head);
+        Utils.writeContents(headBranch, uid);
     }
 
     public static void status() {
