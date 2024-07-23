@@ -1,7 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.Collection;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class Branch {
         BRANCHES_DIR.mkdir();
         try {
             HEAD_FILE.createNewFile();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println("fail to create " + HEAD_FILE);
         }
 
@@ -26,15 +26,15 @@ public class Branch {
         Commit initCommit = new Commit();
         initCommit.save();
 
-        File BRANCH_FILE = Utils.join(BRANCHES_DIR, DEFAULT_BRANCH);
-        Utils.writeContents(BRANCH_FILE, initCommit.getUID());
+        File branchFile = Utils.join(BRANCHES_DIR, DEFAULT_BRANCH);
+        Utils.writeContents(branchFile, initCommit.getUID());
 
     }
 
     public static Commit popHead() {
         String head = Utils.readContentsAsString(HEAD_FILE);
-        File HEAD_BRANCH = Utils.join(BRANCHES_DIR, head);
-        String uid = Utils.readContentsAsString(HEAD_BRANCH);
+        File headBranch = Utils.join(BRANCHES_DIR, head);
+        String uid = Utils.readContentsAsString(headBranch);
         return Commit.fromFileByUID(uid);
     }
 
@@ -73,7 +73,7 @@ public class Branch {
         String uid = popHead().getUID();
         try {
             file.createNewFile();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println(e + ": can not create " + file);
         }
         Utils.writeContents(file, uid);
@@ -93,8 +93,8 @@ public class Branch {
     }
 
     public static Commit popBranch(String branchName) {
-        File HEAD_BRANCH = Utils.join(BRANCHES_DIR, branchName);
-        String uid = Utils.readContentsAsString(HEAD_BRANCH);
+        File headBranch = Utils.join(BRANCHES_DIR, branchName);
+        String uid = Utils.readContentsAsString(headBranch);
         return Commit.fromFileByUID(uid);
     }
 }

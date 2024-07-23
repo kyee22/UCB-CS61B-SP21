@@ -29,7 +29,8 @@ public class GitletRepository {
      */
     public static void init() throws GitletException {
         if (GITLET_DIR.exists()) {
-            throw new GitletException("A Gitlet version-control system already exists in the current directory.");
+            throw new GitletException("A Gitlet version-control system " +
+                    "already exists in the current directory.");
         }
         GITLET_DIR.mkdir();
         OBJ_DIR.mkdir();
@@ -82,7 +83,7 @@ public class GitletRepository {
                 break;
             case "global-log":
                 validateNumArgs(args, 1);
-                global_log();
+                globalLog();
                 break;
             case "find":
                 validateNumArgs(args, 2);
@@ -98,7 +99,7 @@ public class GitletRepository {
                 break;
             case "rm-branch":
                 validateNumArgs(args, 2);
-                rm_branch(args[1]);
+                rmBranch(args[1]);
                 break;
             case "reset":
                 validateNumArgs(args, 2);
@@ -114,7 +115,8 @@ public class GitletRepository {
         pushStage();
     }
 
-    public static void validateNumArgs(String[] args, int... allowedLengths) throws GitletException {
+    public static void validateNumArgs(String[] args, int... allowedLengths)
+            throws GitletException {
         boolean isValidLength = false;
         for (int length : allowedLengths) {
             if (args.length == length) {
@@ -216,7 +218,7 @@ public class GitletRepository {
             throw new GitletException("File does not exist in that commit.");
         }
         Blob blob = Blob.fromFile(curCommit.get(file.getPath()));
-        blob.writeBack();;
+        blob.writeBack();
     }
 
     public static void checkoutCommitFile(String commitID, String path) {
@@ -232,8 +234,8 @@ public class GitletRepository {
         blob.writeBack();
     }
 
-    public static void checkoutBranch(String _branchName) {
-        String branchName = _branchName.replace("/", "_");
+    public static void checkoutBranch(String branchPath) {
+        String branchName = branchPath.replace("/", "_");
         if (!Branch.exist(branchName)) {
             throw new GitletException("No such branch exists.");
         }
@@ -241,7 +243,8 @@ public class GitletRepository {
             throw new GitletException("No need to checkout the current branch.");
         }
         if (!untrackedFiles().isEmpty()) {
-            throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+            throw new GitletException("There is an untracked file in the way; " +
+                    "delete it, or add and commit it first.");
         }
 
         Commit newCommit = Branch.popBranch(branchName);
@@ -270,7 +273,7 @@ public class GitletRepository {
         } while (curCommit != null);
     }
 
-    public static void global_log() {
+    public static void globalLog() {
         for (Commit commit : Commit.fromFileAll()) {
             System.out.println(commit);
         }
@@ -347,8 +350,8 @@ public class GitletRepository {
         Branch.create(branchName);
     }
 
-    public static void rm_branch(String _branchName) throws GitletException {
-        String branchName = _branchName.replace("/", "_");
+    public static void rmBranch(String branchPath) throws GitletException {
+        String branchName = branchPath.replace("/", "_");
         if (!Branch.exist(branchName)) {
             throw new GitletException("A branch with that name does not exist.");
         }
@@ -364,7 +367,8 @@ public class GitletRepository {
             throw new GitletException("No commit with that id exists.");
         }
         if (!untrackedFiles().isEmpty()) {
-            throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+            throw new GitletException("There is an untracked file in the way; " +
+                    "delete it, or add and commit it first.");
         }
 
         for (String uid : commit.dCloneBlobMap().values()) {
@@ -384,8 +388,8 @@ public class GitletRepository {
         Branch.updateHead(commit.getUID());
     }
 
-    public static void merge(String _givenBranchName) throws GitletException {
-        String givenBranchName = _givenBranchName.replace("/", "_");
+    public static void merge(String givenBranchPath) throws GitletException {
+        String givenBranchName = givenBranchPath.replace("/", "_");
         if (!stageForAddition.isEmpty() || !stageForRemoval.isEmpty()) {
             throw new GitletException("You have uncommitted changes.");
         }
@@ -412,11 +416,18 @@ public class GitletRepository {
             return;
         }
 
+        doMerge(lca, curCommit, givenCommit);
+        String msg = "Merged " + givenBranchName.replace("_", "/")
+                               + " into " + Branch.curBranch() + ".";
+        commit(msg, givenCommit);
+    }
+
+    private static void doMerge(Commit lca, Commit curCommit, Commit givenCommit) {
         // case 1:
         for (String path : curCommit.dCloneBlobMap().keySet()) {
             String uid = curCommit.get(path);
-            if (lca.contains(path) && givenCommit.contains(path) &&
-                lca.get(path).equals(uid) && !givenCommit.get(path).equals(uid)) {
+            if (lca.contains(path) && givenCommit.contains(path)
+                    && lca.get(path).equals(uid) && !givenCommit.get(path).equals(uid)) {
                 checkoutCommitFile(givenCommit.getUID(), path);
                 add(path);
             }
@@ -435,7 +446,7 @@ public class GitletRepository {
         for (String path : curCommit.dCloneBlobMap().keySet()) {
             String uid = curCommit.get(path);
             if (lca.contains(path) && !givenCommit.contains(path)
-                && lca.get(path).equals(uid)) {
+                    && lca.get(path).equals(uid)) {
                 rm(path);
             }
         }
@@ -445,18 +456,18 @@ public class GitletRepository {
         for (String path : curCommit.dCloneBlobMap().keySet()) {
             String uid = curCommit.get(path);
             if (!lca.contains(path) && givenCommit.contains(path)
-                && !givenCommit.get(path).equals(uid)) {
+                    && !givenCommit.get(path).equals(uid)) {
                 mergeConflict = true;
                 handleMergeConflict(path, curCommit, givenCommit);
             }
             if (lca.contains(path) && !givenCommit.contains(path)
-                && !lca.get(path).equals(uid)) {
+                    && !lca.get(path).equals(uid)) {
                 mergeConflict = true;
                 handleMergeConflict(path, curCommit, givenCommit);
             }
             if (lca.contains(path) && givenCommit.contains(path)
-                && !lca.get(path).equals(uid) && !givenCommit.get(path).equals(uid)
-                && !lca.get(path).equals(givenCommit.get(path))) {
+                    && !lca.get(path).equals(uid) && !givenCommit.get(path).equals(uid)
+                    && !lca.get(path).equals(givenCommit.get(path))) {
                 mergeConflict = true;
                 handleMergeConflict(path, curCommit, givenCommit);
             }
@@ -464,7 +475,7 @@ public class GitletRepository {
         for (String path : givenCommit.dCloneBlobMap().keySet()) {
             String uid = givenCommit.get(path);
             if (lca.contains(path) && !curCommit.contains(path)
-                && !lca.get(path).equals(uid)) {
+                    && !lca.get(path).equals(uid)) {
                 mergeConflict = true;
                 handleMergeConflict(path, curCommit, givenCommit);
             }
@@ -473,8 +484,6 @@ public class GitletRepository {
         if (mergeConflict) {
             System.out.println("Encountered a merge conflict.");
         }
-        String msg = "Merged " + givenBranchName.replace("_", "/") + " into " + Branch.curBranch() + ".";
-        commit(msg, givenCommit);
     }
 
     private static boolean checkMergeOverwrite(Commit lca, Commit curCommit, Commit givenCommit) {
@@ -482,11 +491,13 @@ public class GitletRepository {
             File file = Utils.join(CWD, name);
             String path = file.getPath();
             if (!curCommit.contains(path)) { // 这个 CWD 下的 file 在 curCommit 下是 untracked 的
+                // 1: 可能被 case 8 的冲突 overwrite
                 if (lca.contains(path) && givenCommit.contains(path)
-                    && !lca.get(path).equals(givenCommit.get(path))) {   // 1: 可能被 case 8 的冲突 overwrite
+                    && !lca.get(path).equals(givenCommit.get(path))) {
                     return true;
                 }
-                if (!lca.contains(path) && givenCommit.contains(path)) { // 2: 可能被 case 5 的情况 overwrite
+                // 2: 可能被 case 5 的情况 overwrite
+                if (!lca.contains(path) && givenCommit.contains(path)) {
                     return true;
                 }
             }
@@ -526,7 +537,8 @@ public class GitletRepository {
             File file = Utils.join(CWD, name);
             // The final category (“Untracked Files”) is for files present in
             // the working directory but neither staged for addition nor tracked.
-            if (!curCommit.contains(file.getPath()) && !stageForAddition.contains(file.getPath())) {
+            if (!curCommit.contains(file.getPath())
+                    && !stageForAddition.contains(file.getPath())) {
                 res.add(name);
             }
         }
@@ -547,7 +559,7 @@ public class GitletRepository {
                 && !curCommit.get(file.getPath()).equals(blob.getUID())) {
                 res.add(name);
             }
-            // 2: Staged for addition, but with different contents than in the working directory; or
+            // 2: Staged for addition, but with different contents than in the working directory;
             if (stageForAddition.contains(file.getPath())
                     && !stageForAddition.get(file.getPath()).equals(blob.getUID())) {
                 res.add(name);
@@ -562,7 +574,8 @@ public class GitletRepository {
             }
         }
 
-        // 4: Not staged for removal, but tracked in the current commit and deleted from the working directory.
+        // 4: Not staged for removal, but tracked in the current commit
+        //    and deleted from the working directory.
         for (String path : curCommit.dCloneBlobMap().keySet()) {
             File file = new File(path);
             if (!stageForRemoval.contains(path) && !file.exists()) {

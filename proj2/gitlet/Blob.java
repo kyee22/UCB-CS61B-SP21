@@ -33,6 +33,11 @@ public class Blob implements Serializable {
         return UID.equals(((Blob) o).getUID());
     }
 
+    @Override
+    public int hashCode() {
+        return this.UID != null ? this.UID.hashCode() : 0;
+    }
+
     public String getUID() {
         return UID;
     }
@@ -45,8 +50,8 @@ public class Blob implements Serializable {
         Utils.writeObject(Utils.join(BLOB_DIR, UID), this);
     }
 
-    public static Blob fromFile(String UID) {
-        return Utils.readObject(Utils.join(BLOB_DIR, UID), Blob.class);
+    public static Blob fromFile(String uid) {
+        return Utils.readObject(Utils.join(BLOB_DIR, uid), Blob.class);
     }
 
     public void writeBack() {

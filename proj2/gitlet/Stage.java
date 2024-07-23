@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.TreeMap;
 
@@ -19,7 +20,7 @@ public class Stage implements Serializable {
         try {
             STAGE_ADD_FILE.createNewFile();
             STAGE_RM_FILE.createNewFile();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println("fail to create " + STAGE_ADD_FILE + " " + STAGE_RM_FILE);
         }
     }

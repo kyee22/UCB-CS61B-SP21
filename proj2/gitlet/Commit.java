@@ -1,7 +1,5 @@
 package gitlet;
 
-// TODO: any imports you need here
-
 import java.io.File;
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -65,7 +63,8 @@ public class Commit implements Serializable {
         sb.append("===\n");
         sb.append("commit " + UID + "\n");
         if (parents.size() > 1) {
-            sb.append("Merge: " + parents.get(0).substring(0,7) + " " + parents.get(1).substring(0,7) + "\n");
+            sb.append("Merge: " + parents.get(0).substring(0, 7));
+            sb.append(" " + parents.get(1).substring(0, 7) + "\n");
         }
         sb.append("Date: " + timeStamp + "\n");
         sb.append(message + "\n");
@@ -86,8 +85,8 @@ public class Commit implements Serializable {
         return message;
     }
 
-    public static Commit fromFileByUID(String UID) {
-        return Utils.readObject(Utils.join(COMMIT_DIR, UID), Commit.class);
+    public static Commit fromFileByUID(String uid) {
+        return Utils.readObject(Utils.join(COMMIT_DIR, uid), Commit.class);
     }
 
     public static Commit fromFileByPrefixUID(String prefix) {
@@ -116,7 +115,7 @@ public class Commit implements Serializable {
         if (o == null || !(o instanceof Commit)) {
             return false;
         }
-        return UID.equals(((Commit)o).getUID());
+        return UID.equals(((Commit) o).getUID());
     }
 
     @Override
@@ -178,11 +177,11 @@ public class Commit implements Serializable {
             return;
         }
 
-        int _distance = distance;
+        int fixedDistance = distance;
         if (distances.containsKey(commit) && distances.get(commit) < distance) {
-            _distance = distances.get(commit);
+            fixedDistance = distances.get(commit);
         }
-        distances.put(commit, _distance);
+        distances.put(commit, fixedDistance);
         dfs(commit.getFirstParent(), distance + 1, distances);
         dfs(commit.getSecondParent(), distance + 1, distances);
     }

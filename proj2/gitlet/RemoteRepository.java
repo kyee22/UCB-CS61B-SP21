@@ -1,17 +1,10 @@
 package gitlet;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class RemoteRepository {
     static final File REMOTE_DIR = Utils.join(GitletRepository.REFS_DIR, "remote");
@@ -32,13 +25,13 @@ public class RemoteRepository {
 
     public static void create(String remoteName, String remotePath) {
         File file = Utils.join(REMOTE_DIR, remoteName);
-        String _remotePath = remotePath.replace("/", File.separator);
+        String fixedRemotePath = remotePath.replace("/", File.separator);
         try {
             file.createNewFile();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println(e + ": can not create " + file);
         }
-        Utils.writeContents(file, _remotePath);
+        Utils.writeContents(file, fixedRemotePath);
     }
 
     public static void delete(String remoteName) {
@@ -58,7 +51,7 @@ public class RemoteRepository {
                 rmRemote(args[1]);
                 break;
             case "push":
-                validateNumArgs(args,3);
+                validateNumArgs(args, 3);
                 push(args[1], args[2]);
                 break;
             case "fetch":
@@ -163,7 +156,7 @@ public class RemoteRepository {
         if (!branchFile.exists()) {
             try {
                 branchFile.createNewFile();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println("shit!" + e);
             }
         }
@@ -172,9 +165,9 @@ public class RemoteRepository {
 
     private static void pull(String remoteName, String branchName) throws GitletException {
         fetch(remoteName, branchName);
-        String _branchName = remoteName + "_" + branchName;
+        String fixedBranchName = remoteName + "_" + branchName;
         //GitletRepository.merge(_branchName);    // wrong!! 直接从这里进去的话 stage 还没有 pop
-        String[] args = {"merge", _branchName};
+        String[] args = {"merge", fixedBranchName};
         GitletRepository.entry(args);             // correct!!
     }
 
@@ -184,7 +177,8 @@ public class RemoteRepository {
     }
 
 
-    private static void validateNumArgs(String[] args, int... allowedLengths) throws GitletException {
+    private static void validateNumArgs(String[] args, int... allowedLengths)
+            throws GitletException {
         boolean isValidLength = false;
         for (int length : allowedLengths) {
             if (args.length == length) {
@@ -206,7 +200,7 @@ public class RemoteRepository {
         File file = Utils.join(path, "refs", "branches", branchName);
         try {
             file.createNewFile();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println("can not create " + file);
         }
     }
