@@ -1,8 +1,7 @@
 package bstmap;
 
 import java.security.Key;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     private int size;
@@ -96,7 +95,8 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public Set<K> keySet() {
-        throw new UnsupportedOperationException("Unimplemented!!");
+        //throw new UnsupportedOperationException("Unimplemented!!");
+        return getKeysAsSet(root);
     }
 
     @Override
@@ -109,9 +109,12 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         throw new UnsupportedOperationException("Unimplemented!!");
     }
 
+
+
     @Override
     public Iterator<K> iterator() {
-        throw new UnsupportedOperationException("Unimplemented!!");
+        //throw new UnsupportedOperationException("Unimplemented!!");
+        return new BSTMapIterator();
     }
 
     private BSTNode find(BSTNode node, K key) {
@@ -120,7 +123,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         }
         if (node.getKey().equals(key)) {
             return node;
-        } else if (node.getKey().compareTo(key) < 0) {
+        } else if (node.getKey().compareTo(key) > 0) {
             return find(node.getLeft(), key);
         } else {
             return find(node.getRight(), key);
@@ -133,13 +136,64 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             return new BSTNode(key, value);
         }
 
-        if (node.getKey().compareTo(key) < 0) {
+        if (node.getKey().compareTo(key) > 0) {
             node.setLeft(insert(node.getLeft(), key, value));
-        } else if (node.getKey().compareTo(key) > 0) {
+        } else if (node.getKey().compareTo(key) < 0) {
             node.setRight(insert(node.getRight(), key, value));
         }
 
         return node;
     }
 
+    public void printInOrder() {
+        System.out.println("==============BSTMap================");
+        for (K key : getKeysAsList(root)) {
+            System.out.println("(" + key + ", " + get(key) + ")");
+        }
+        System.out.println("====================================");
+    }
+
+    private class BSTMapIterator implements Iterator<K> {
+        private Iterator<K> keyIter;
+        public BSTMapIterator() {
+            keyIter = keySet().iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return keyIter.hasNext();
+        }
+
+        @Override
+        public K next() {
+            return keyIter.next();
+        }
+    }
+
+    private Set<K> getKeysAsSet(BSTNode node) {
+        if (node == null) {
+            return new HashSet<>();
+        }
+
+        Set<K> result = new HashSet<>();
+        result.add(node.getKey());
+
+        result.addAll(getKeysAsSet(node.getLeft()));
+        result.addAll(getKeysAsSet(node.getRight()));
+
+        return result;
+    }
+
+    private List<K> getKeysAsList(BSTNode node) {
+        if (node == null) {
+            return new ArrayList<>();
+        }
+
+        List<K> result = new ArrayList<>();
+        result.addAll(getKeysAsList(node.getLeft()));
+        result.add(node.getKey());
+        result.addAll(getKeysAsList(node.getRight()));
+
+        return result;
+    }
 }
