@@ -101,12 +101,14 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException("Unimplemented!!");
+        //throw new UnsupportedOperationException("Unimplemented!!");
+        return doRemove(null, root, false, key);
     }
 
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException("Unimplemented!!");
+        //throw new UnsupportedOperationException("Unimplemented!!");
+        return doRemove(null, root, false, key, value);
     }
 
 
@@ -196,4 +198,97 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
         return result;
     }
+
+    private V doRemove(BSTNode parent, BSTNode node, boolean isLeft, K key) {
+        if (node == null) {
+            return null;
+        }
+
+        if (node.getKey().equals(key)) {
+            V value = node.getValue();
+            doPopNode(parent, node, isLeft);
+            return value;
+        } else if (node.getKey().compareTo(key) > 0) {
+            return doRemove(node, node.getLeft(), true, key);
+        } else {
+            return doRemove(node, node.getRight(),false, key);
+        }
+    }
+
+    private V doRemove(BSTNode parent, BSTNode node, boolean isLeft, K key, V givenValue) {
+        if (node == null) {
+            return null;
+        }
+
+        if (node.getKey().equals(key)) {
+            V value = node.getValue();
+            if (!value.equals(givenValue)) {
+                return null;
+            }
+            doPopNode(parent, node, isLeft);
+            return value;
+        } else if (node.getKey().compareTo(key) > 0) {
+            return doRemove(node, node.getLeft(), true, key);
+        } else {
+            return doRemove(node, node.getRight(),false, key);
+        }
+    }
+
+
+    private void doPopNode(BSTNode parent, BSTNode node, boolean isLeft) {
+        BSTNode left = node.getLeft(), right = node.getRight();
+        size -= 1;
+
+        if (left == null && right == null) {
+            if (parent == null) {
+                root = null;
+            } else if (isLeft) {
+                parent.setLeft(null);
+            } else {
+                parent.setRight(null);
+            }
+        } else if (left != null && right == null) {
+            if (parent == null) {
+                root = node.getLeft();
+            } else if (isLeft) {
+                parent.setLeft(node.getLeft());
+            } else {
+                parent.setRight(node.getLeft());
+            }
+        } else if (left == null && right != null) {
+            if (parent == null) {
+                root = node.getRight();
+            } else if (isLeft) {
+                parent.setLeft(node.getRight());
+            } else {
+                parent.setRight(node.getRight());
+            }
+        } else {
+            BSTNode rightmost = popRightMost(node, node.getLeft(), true);
+            rightmost.setLeft(node.getLeft());
+            rightmost.setRight(node.getRight());
+
+            if (parent == null) {
+                root = rightmost;
+            } else if (isLeft) {
+                parent.setLeft(rightmost);
+            } else {
+                parent.setRight(rightmost);
+            }
+        }
+    }
+
+    private BSTNode popRightMost(BSTNode parent, BSTNode node, boolean firstStep) {
+        if (node.getRight() == null) {
+            if (firstStep) { // 第一步是往左下方找
+                parent.setLeft(node.getLeft());
+            } else {        // 剩下的都是往右下方找
+                parent.setRight(node.getLeft());
+            }
+            return node;
+        }
+
+        return popRightMost(node, node.getRight(), false);
+    }
+
 }
