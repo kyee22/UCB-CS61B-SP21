@@ -98,7 +98,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * OWN BUCKET DATA STRUCTURES WITH THE NEW OPERATOR!
      */
     protected Collection<Node> createBucket() {
-        return new LinkedList<>();
+        return new HashSet<>();
     }
 
     /**
@@ -170,6 +170,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     @Override
     public void put(K key, V value) {
+        checkAndResize(buckets.length * 2);
         int hashCode = (key.hashCode() & 0x7fffffff) % buckets.length;
 
         if (buckets[hashCode] == null) {
@@ -270,5 +271,26 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         public K next() {
             return iter.next();
         }
+    }
+
+    private void checkAndResize(int newsize) {
+        if (loadFactor() <= maxLoad) {
+            return;
+        }
+
+        Collection<Node>[] oldBuckets = buckets;
+        buckets = createTable(newsize);
+        clear();
+
+        for (Collection<Node> bucket : oldBuckets) {
+            if (bucket != null) {
+                Iterator<Node> iterator = bucket.iterator();
+                while (iterator.hasNext()) {
+                    Node node = iterator.next();
+                    put(node.getKey(), node.getValue());
+                }
+            }
+        }
+
     }
 }
