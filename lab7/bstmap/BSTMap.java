@@ -111,8 +111,6 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return doRemove(null, root, false, key, value);
     }
 
-
-
     @Override
     public Iterator<K> iterator() {
         //throw new UnsupportedOperationException("Unimplemented!!");
@@ -279,6 +277,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     }
 
     private BSTNode popRightMost(BSTNode parent, BSTNode node, boolean firstStep) {
+        // the key step inspired by https://math.oxford.emory.edu/site/cs171/hibbardDeletion/
         if (node.getRight() == null) {
             if (firstStep) { // 第一步是往左下方找
                 parent.setLeft(node.getLeft());
