@@ -24,15 +24,15 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
             value = v;
         }
 
-        public K getKey() {
+        private K getKey() {
             return key;
         }
 
-        public V getValue() {
+        private V getValue() {
             return value;
         }
 
-        public void setValue(V value) {
+        private void setValue(V value) {
             this.value = value;
         }
     }
